@@ -3,4 +3,4 @@ server:
 
 security:
   api-key: 8324f4e0-d452-415c-b805-3dd15391cc6c
-  jwt-secret: tuSecretoMuySegur0
+  jwt-secret: 4c90b075-e62b-42a0-b5a7-8eaf6e23934b
