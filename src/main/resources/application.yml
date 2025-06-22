@@ -1,6 +1,6 @@
 server:
-port: 8080
+  port: 8080
 
 security:
-api-key: 2f5ae96c-b558-4c7b-a590-a501ae1c3f6c
-jwt-secret: tuSecretoMuySegur0
+  api-key: 8324f4e0-d452-415c-b805-3dd15391cc6c
+  jwt-secret: tuSecretoMuySegur0
