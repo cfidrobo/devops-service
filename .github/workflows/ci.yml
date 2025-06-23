@@ -134,7 +134,8 @@ jobs:
           
           
           # Descomenta si realmente quieres mandar correo
-          apk add --no-cache msmtp
+          sudo apt-get update
+          sudo apt-get install -y msmtp ca-certificates
           {
             echo "account default"
             echo "host smtp.gmail.com"
