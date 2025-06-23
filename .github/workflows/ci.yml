@@ -78,7 +78,7 @@ jobs:
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GHCR_PAT }}
 
       - name: Build & push Docker image
         run: |
@@ -90,6 +90,15 @@ jobs:
           
           docker push "$IMAGE_MAIN"
           docker push "$IMAGE_LATEST"
+      - name: Save pipeline status
+        run: |
+          mkdir -p logs
+          echo "push: success" >> $PIPELINE_STATUS_FILE
+      - name: Upload pipeline log
+        uses: actions/upload-artifact@v4
+        with:
+          name: pipeline-logs
+          path: logs/pipeline_status.log
 
   ###############################################################################
   #  4) NOTIFY  (siempre)
