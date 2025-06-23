@@ -19,11 +19,12 @@ env:
   REGISTRY: ghcr.io            # Usa GHCR; cámbialo si prefieres Docker Hub
   IMAGE_OWNER: ${{ github.repository_owner }}
   IMAGE_REPO:  ${{ github.event.repository.name }}
-
-###############################################################################
-#  1) VALIDATE
-###############################################################################
 jobs:
+
+  ###############################################################################
+  #  1) VALIDATE
+  ###############################################################################
+
   validate:
     runs-on: ubuntu-latest
     steps:
@@ -49,11 +50,83 @@ jobs:
             echo "✅ No es tag. Se asume rama dev."
           fi
 
+###############################################################################
+# 2) RESOLVE DEPENDENCIES
+###############################################################################
+  resolve-deps:
+    name: Resolve Dependencies
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Resolve Maven dependencies
+        run: mvn dependency:resolve
+
   ###############################################################################
-  #  2) BUILD
+  # 3) TEST
+  ###############################################################################
+  test:
+    name: Run Tests & Collect Coverage
+    needs: [validate, resolve-deps]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+
+      - name: Run unit tests
+        run: mvn test
+
+      - name: Generate JaCoCo report
+        run: mvn jacoco:report
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: target/surefire-reports/
+
+  ###############################################################################
+  # 4) STATIC ANALYSIS
+  ###############################################################################
+  static-analysis:
+    name: Static Code Analysis
+    needs: [validate, test]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+
+      - name: Run Checkstyle
+        run: mvn checkstyle:check
+
+      - name: Run SpotBugs
+        run: mvn spotbugs:check
+
+      - name: Upload analysis reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-reports
+          path: target/*-reports/
+
+  ###############################################################################
+  #  5) BUILD y PUSH
   ###############################################################################
   build_and_push:
-    needs: validate
+    needs: [validate, static-analysis]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -101,7 +174,7 @@ jobs:
           path: logs/pipeline_status.log
 
   ###############################################################################
-  #  4) NOTIFY  (siempre)
+  #  6) NOTIFY  (siempre)
   ###############################################################################
   notify:
     runs-on: ubuntu-latest
