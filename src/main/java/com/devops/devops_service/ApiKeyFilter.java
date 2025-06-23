@@ -13,7 +13,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
-public class ApiKeyFilter extends OncePerRequestFilter {
+public class
+ApiKeyFilter extends OncePerRequestFilter {
     @Value("${security.api-key}")
     private String validKey;
 
